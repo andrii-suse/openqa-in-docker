@@ -102,18 +102,10 @@ done
 
 docker exec "$containername" pwd >& /dev/null || (echo Cannot start container; exit 1 ) >&2
 
-# starting services in container does enable apparmor profile
-# on host, so we must disable the profile again
-# so it doesn't interfere with the test
-# (feel free to remove this line if it is not needed)
-# echo 'apparmor_parser -R /etc/apparmor.d/usr.share.openqa.script.openqa || :' |  docker exec -i "$containername" bash -x
-# echo 'apparmor_parser -R /etc/apparmor.d/usr.share.openqa.script.worker || :' |  docker exec -i "$containername" bash -x
-# [ ! -f /etc/apparmor.d/usr.share.openqa.script.worker ] || sudo apparmor_parser -R /etc/apparmor.d/usr.share.openqa.script.worker || :
-
 # these are hacks to make apparmor tolerate container
-echo 'sed -i "s,/usr/share/openqa/script/openqa {,/usr/share/openqa/script/openqa flags=(attach_disconnected) {," /etc/apparmor.d/usr.share.openqa.script.openqa' | docker exec -i "$containername" bash -x
-echo 'sed -i "s,/usr/share/openqa/script/worker {,/usr/share/openqa/script/worker flags=(attach_disconnected) {," /etc/apparmor.d/usr.share.openqa.script.worker' | docker exec -i "$containername" bash -x
-# echo 'echo " /var/lib/docker/** r," >> /etc/apparmor.d/local/usr.share.openqa.script.openqa' | docker exec -i "$containername" bash -x
+echo 'sed -i "s|/usr/share/openqa/script/openqa {|/usr/share/openqa/script/openqa flags=(attach_disconnected) {\n  /var/lib/docker/** r,|" /etc/apparmor.d/usr.share.openqa.script.openqa' | docker exec -i "$containername" bash -x
+echo 'sed -i "s|/usr/share/openqa/script/worker {|/usr/share/openqa/script/worker flags=(attach_disconnected) {\n  /var/lib/docker/** r,|" /etc/apparmor.d/usr.share.openqa.script.worker' | docker exec -i "$containername" bash -x
+echo 'echo " /var/lib/docker/** r," >> /etc/apparmor.d/local/usr.share.openqa.script.openqa' | docker exec -i "$containername" bash -x
 # echo 'sed -i "s,/opt/openqa-trigger-from-obs/script/rsync.sh {,/opt/openqa-trigger-from-obs/script/rsync.sh flags=(attach_disconnected) {," /etc/apparmor.d/opt.openqa-trigger-from-obs.script.rsync.sh' | docker exec -i "$containername" bash -x
 # echo 'sed -i "/\/usr\/bin\/rsync mrix,/a  \/var\/lib\/docker\/** r," /etc/apparmor.d/opt.openqa-trigger-from-obs.script.rsync.sh' | docker exec -i "$containername" bash -x
 # echo 'echo " /var/lib/docker/** r," >> /etc/apparmor.d/local/opt.openqa-trigger-from-obs.script.rsync.sh' | docker exec -i "$containername" bash -x

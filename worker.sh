@@ -7,9 +7,6 @@ systemctl enable --now postgresql
 su postgres -c "createuser -D $dbuser" 
 su postgres -c "createdb -O $dbuser $dbname"
 
-aa-complain /usr/share/openqa/script/openqa
-aa-complain /usr/share/openqa/script/worker
-
 systemctl enable --now apache2.service
 systemctl enable --now openqa-webui.service
 systemctl enable --now openqa-websockets.service
